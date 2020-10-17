@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="300.0" maxWidth="250.0" minHeight="300.0" minWidth="250.0" prefHeight="300.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.pentragon.java2.networkclient.controllers.AuthDialogControlleer">
+   <children>
+      <Button fx:id="logInButton" layoutX="94.0" layoutY="235.0" mnemonicParsing="false" onAction="#executeAuth" text="Log In!">
+         <font>
+            <Font size="14.0" />
+         </font></Button>
+      <Label layoutX="71.0" layoutY="14.0" text="Authorization">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="103.0" layoutY="69.0" text="Login">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="88.0" layoutY="144.0" text="Password">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="loginField" layoutX="51.0" layoutY="96.0" />
+      <PasswordField fx:id="passwordField" layoutX="51.0" layoutY="171.0" />
+   </children>
+</AnchorPane>
