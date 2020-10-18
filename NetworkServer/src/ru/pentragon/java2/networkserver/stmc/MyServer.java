@@ -1,25 +1,36 @@
 package ru.pentragon.java2.networkserver.stmc;
 
+import ru.pentragon.java2.clientserver.Command;
+import ru.pentragon.java2.clientserver.user.User;
+import ru.pentragon.java2.clientserver.user.Users;
 import ru.pentragon.java2.networkserver.auth.AuthService;
 import ru.pentragon.java2.networkserver.auth.DefaultAuthService;
 import ru.pentragon.java2.networkserver.handler.ClientHandler;
-import ru.pentragon.java2.networkserver.repo.Users;
+import ru.pentragon.java2.networkserver.repo.MyRepo;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MyServer {
     private final ServerSocket serverSocket;
     private final AuthService authService;
     private final List<ClientHandler> clients = new ArrayList<>();
     private boolean serverOff;
+    private static Users users;
+
+    public static Users getUsers() {
+        return users;
+    }
 
     public MyServer(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
         this.authService = new DefaultAuthService();
+        users = MyRepo.createDataBase();
     }
 
     public void start() throws IOException{
@@ -55,12 +66,24 @@ public class MyServer {
         return authService;
     }
 
-    public synchronized void subscribe(ClientHandler handler) {
+    public synchronized void subscribe(ClientHandler handler) throws IOException {
         clients.add(handler);
+        Map<String, String> mapU= listConnectedUsers();
+        broadcastMessage(null, Command.updateUserListCommand(mapU));
     }
 
-    public synchronized void unsubscribe(ClientHandler handler) {
+    public synchronized void unsubscribe(ClientHandler handler) throws IOException {
         clients.remove(handler);
+        Map<String, String> mapU= listConnectedUsers();
+        broadcastMessage(null, Command.updateUserListCommand(mapU));
+    }
+
+    private Map<String, String> listConnectedUsers() {
+        Map<String, String> mapU = new HashMap<>();
+        for (ClientHandler client : clients) {
+            mapU.put(client.getUser().getLogin(), client.getUsername());
+        }
+        return mapU;
     }
 
     public synchronized boolean isNicknameAlreadyBusy(String login) {
@@ -72,21 +95,24 @@ public class MyServer {
         return false;
     }
 
-    public synchronized void broadcastMessage(String message, ClientHandler sender) throws IOException {
+    public synchronized void broadcastMessage(ClientHandler sender, Command command) throws IOException {
         for (ClientHandler client : clients) {
             if (client == sender) {
                 continue;
             }
-            //privateMessage(client.getUser().getLogin(), message, sender);
-            client.sendMessage("SERVER " + message);
+            client.sendMessage(command);
         }
     }
-    public synchronized void privateMessage(String receiver, String message, ClientHandler sender) throws IOException {
+
+    public synchronized void privateMessage(String receiver, String message, String sender) throws IOException {
         for (ClientHandler client : clients) {
             if (client.getUser().getLogin().equals(receiver)) {
-                client.sendMessage(sender.getUser().getLogin()+" "+message);
-            }
+                client.sendMessage(Command.messageCommand(receiver,message,sender));
 
+                //сохраняем личную переписку
+                client.getUser().saveMsgToDialog(users.getUserByLogin(sender).getLogin(), message);//записали сообщение получателю
+                users.getUserByLogin(sender).saveMsgToDialog(client.getUser().getLogin(),message);//записали сообщение отправителю
+            }
         }
     }
 }

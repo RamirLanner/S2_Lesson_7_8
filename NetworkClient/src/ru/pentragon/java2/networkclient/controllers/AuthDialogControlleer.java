@@ -28,12 +28,9 @@ public class AuthDialogControlleer {
             return;
         }
 
-        String authError = network.sendAuthCommand(login, password);
-        if (authError == null) {
+        if (network.sendAuthCommand(login, password)) {
             clientApp.openChat();
             //System.out.println("auth good");
-        } else {
-            ClientApp.showErrorWindow(authError, "Auth error");
         }
     }
 

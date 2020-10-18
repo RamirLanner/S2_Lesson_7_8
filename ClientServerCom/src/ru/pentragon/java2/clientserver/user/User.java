@@ -1,16 +1,18 @@
-package ru.pentragon.java2.networkserver.stmc;
+package ru.pentragon.java2.clientserver.user;
 
-import ru.pentragon.java2.networkserver.repo.Messages;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
+import java.io.Serializable;
 import java.util.Objects;
 
-public class User {
+public class User implements Serializable {
 
     private final String login;
     private final String password;
     private final String username;
     private Messages messages;
-    private boolean onlineStatus;
 
     public User(String login, String password, String username) {
         this.login = login;
@@ -19,20 +21,24 @@ public class User {
         this.messages = new Messages();
     }
 
-    public synchronized String getLogin() {
+    public String getLogin() {
         return login;
     }
 
-    public synchronized String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public synchronized Messages getMessages() {
+    public Messages getMessages() {
         return messages;
     }
 
-    public synchronized String getUsername() {
+    public String getUsername() {
         return username;
+    }
+
+    public StringProperty getUserNameStringPropertyType(){
+        return new SimpleStringProperty(username);
     }
 
     @Override
@@ -58,4 +64,9 @@ public class User {
                 ", username='" + username + '\'' +
                 '}';
     }
+
+    public void saveMsgToDialog(String user, String msg){//User user
+        messages.addMsg(user, msg);
+    }
+
 }

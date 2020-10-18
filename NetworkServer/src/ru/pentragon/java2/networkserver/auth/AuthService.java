@@ -1,6 +1,7 @@
 package ru.pentragon.java2.networkserver.auth;
 
-import ru.pentragon.java2.networkserver.stmc.User;
+
+import ru.pentragon.java2.clientserver.user.User;
 
 public interface AuthService {
     default void start(){};

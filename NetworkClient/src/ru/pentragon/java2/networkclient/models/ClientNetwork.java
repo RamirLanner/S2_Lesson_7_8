@@ -1,38 +1,27 @@
 package ru.pentragon.java2.networkclient.models;
 
 import javafx.application.Platform;
+import ru.pentragon.java2.clientserver.Command;
+import ru.pentragon.java2.clientserver.commands.*;
+import ru.pentragon.java2.clientserver.user.User;
+import ru.pentragon.java2.networkclient.ClientApp;
 import ru.pentragon.java2.networkclient.controllers.MainViewController;
-import ru.pentragon.java2.networkclient.user_repo.User;
-import ru.pentragon.java2.networkclient.user_repo.Users;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 
 public class ClientNetwork {
-    private static final String AUTH_CMD_PREFIX = "/auth";
-    private static final String AUTHOK_CMD_PREFIX = "/authok";
-    private static final String AUTHERR_CMD_PREFIX = "/autherr";
 
     private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 8189;
 
     private final String host;
     private final int port;
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
+    private ObjectInputStream inputStream;
+    private ObjectOutputStream outputStream;
     private Socket socket;
-    private String username;
     private User user;
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public String getUsername() {
-        return username;
-    }
 
     public User getUser() {
         return user;
@@ -50,8 +39,8 @@ public class ClientNetwork {
     public boolean connect() {
         try {
             socket = new Socket(host, port);
-            inputStream = new DataInputStream(socket.getInputStream());
-            outputStream = new DataOutputStream(socket.getOutputStream());
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            inputStream = new ObjectInputStream(socket.getInputStream());
             return true;
         } catch (IOException e) {
             System.err.println("Соединение не было установлено!");
@@ -61,37 +50,62 @@ public class ClientNetwork {
     }
 
     //формирование запроса на аутентификацию и получение результата
-    public String sendAuthCommand(String login, String password) {
+    public boolean sendAuthCommand(String login, String password) {
         try {
-            getOutputStream().writeUTF(String.format("%s %s %s", AUTH_CMD_PREFIX, login, password));
-            String response = getInputStream().readUTF();
-            if (response.startsWith(AUTHOK_CMD_PREFIX)) {//проверяем с чего начинается ответ, если ок
-                this.username = response.split("\\s+", 2)[1];//определяем юзернейм
-                //нул значит хорошо
-                user = Users.getUserByLogin(login);
-                return null;
-            } else {
-                //получили не то что хотели передаем сообщение дальше
-                return response.split("\\s+", 2)[1];
+            getOutputStream().writeObject(Command.authCommand(login, password));
+            Command command = readCommand();
+            if (command == null) {
+                System.err.println("Server send null auth response");
+                return false;
+            }
+            switch (command.getType()) {
+                case AUTH_OK: {
+                    AuthOkCommandData data = (AuthOkCommandData) command.getData();
+                    this.user = data.getUser();
+                    return true;
+                }
+                case AUTH_ERROR: {
+                    AuthErrorCommandData data = (AuthErrorCommandData) command.getData();
+                    String message = data.getErrorMessage();
+                    ClientApp.showErrorWindow(message, "Auth error");
+                    return false;
+                }
+                default: {
+                    System.err.println("Unknown type command from server " + command.getType());
+                    return false;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return e.getMessage();
+            System.err.println("Send/recieve logpass pronlem!");
+            return false;
+        }
+    }
+
+    private Command readCommand() throws IOException {
+        try {
+            return (Command) getInputStream().readObject();
+        } catch (ClassNotFoundException e) {
+            String errorMessage = "Unknown type of object from client";
+            System.err.println(errorMessage);
+            e.printStackTrace();
+            return null;
         }
     }
 
     //получение стримов
-    public DataInputStream getInputStream() {
+    public ObjectInputStream getInputStream() {
         return inputStream;
     }
     //получение стримов
-    public DataOutputStream getOutputStream() {
+    public ObjectOutputStream getOutputStream() {
         return outputStream;
     }
 
     //закрытие сокета
     public void close() {
         try {
+            getOutputStream().writeObject(Command.endCommand());
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -102,20 +116,32 @@ public class ClientNetwork {
         Thread thread = new Thread(() -> {
             try {
                 while (true) {
-                    String message = inputStream.readUTF();
-                    System.out.println(message);
-
-                    String[] parts = message.split("\\s+", 2);// один пробел и более
-                    String login = parts[0];
-                    String content = parts[1];
-
-                    user.saveMsgToDialog(Users.getUserByLogin(login), content);
-
-                        Platform.runLater(() -> {
-                            //надо будет дописать логику обновления, пока не нашел приемлимый вариант, и пользователь должен перещелкивать что бы увидеть сообщение
-                            //viewController.initialize();
-                            //viewController.showMessages(user);
-                        });
+                    Command command = readCommand();
+                    if (command == null) {
+                        System.err.println("Server send null auth response");
+                        continue;
+                    }
+                    switch (command.getType()) {
+                        case MESSAGE: {
+                            MessageCommandData data = (MessageCommandData) command.getData();
+                            String receiver = data.getReceiver();
+                            String message = data.getMessage();
+                            String sender = data.getSender();
+                            System.out.println(sender+" to "+ receiver+": message="+message);
+                            Platform.runLater(() -> viewController.showMessages());
+                            user.saveMsgToDialog(sender, message);
+                            break;
+                        }
+                        case UPDATE_USERS_LIST: {
+                            UpdateUsersListCommandData data = (UpdateUsersListCommandData) command.getData();
+                            Map<String,String> message = data.getUsers();
+                            Platform.runLater(() -> viewController.updateUserList(message));
+                            break;
+                        }
+                        default: {
+                            System.err.println("Unknown type command from server " + command.getType());
+                        }
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

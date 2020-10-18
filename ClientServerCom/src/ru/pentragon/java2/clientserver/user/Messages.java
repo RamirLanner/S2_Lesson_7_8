@@ -1,18 +1,20 @@
-package ru.pentragon.java2.networkclient.user_repo;
+package ru.pentragon.java2.clientserver.user;
 
-import javafx.collections.FXCollections;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
+public class Messages implements Serializable {
 
-public class Messages {
-
-    private Map<User, LinkedList<String>> messageData;
+    private Map<String, LinkedList<String>> messageData;//Map<User, LinkedList<String>>
 
     public Messages() {
         this.messageData = new HashMap<>();
     }
 
-    public void addMsg(User user, String msg){
+    public void addMsg(String user, String msg){//User user
         if(messageData.containsKey(user)){
             messageData.get(user).addFirst(msg);
         }
@@ -23,11 +25,11 @@ public class Messages {
         }
     }
 
-    public LinkedList<String> getMSGs(User user){
-        return messageData.getOrDefault(user, null);
-    }
+//    public LinkedList<String> getMSGs(User user){
+//        return messageData.getOrDefault(user, null);
+//    }
 
-    public LinkedList<Message> getMSGsForView(User user){
+    public LinkedList<Message> getMSGsForView(String user){
         LinkedList<Message> temp2 = new LinkedList<>();
         List<String> temp = messageData.getOrDefault(user, null);
         if(temp!=null){

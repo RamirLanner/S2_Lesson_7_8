@@ -1,11 +1,11 @@
-package ru.pentragon.java2.networkclient.user_repo;
+package ru.pentragon.java2.clientserver.user;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Message {
+public class Message implements Serializable {
     private StringProperty msg;
 
     public Message(String msg) {

@@ -1,12 +1,15 @@
-package ru.pentragon.java2.networkclient.user_repo;
+package ru.pentragon.java2.networkserver.repo;
 
-import java.util.ArrayList;
+import ru.pentragon.java2.clientserver.user.User;
+import ru.pentragon.java2.clientserver.user.Users;
+
 import java.util.Collections;
 import java.util.List;
 
+
 import static java.util.List.of;
 
-public class Users {//хранилище данных
+public class MyRepo {
     private static final List<User> USERS = of(
             new User("login1", "pass1", "User1"),
             new User("login2", "pass2", "User2"),
@@ -18,20 +21,11 @@ public class Users {//хранилище данных
             new User("SERVER", "SERVER", "Server")
     );
 
-    private static List<User> activeUsers;
-
-    public static synchronized ArrayList<User> getUSERS() {
-        //System.out.println(USERS);
-        return new ArrayList<>(USERS);
-    }
-
-    public static synchronized User getUserByLogin(String login){
+    public static Users createDataBase(){
+        Users clients = new Users();
         for (User user : USERS) {
-            if(user.getLogin().equals(login)){
-                return user;
-            }
+            clients.addUser(user);
         }
-        return null;
+        return clients;
     }
-
 }

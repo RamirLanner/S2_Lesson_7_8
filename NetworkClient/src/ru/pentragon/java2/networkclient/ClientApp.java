@@ -1,7 +1,6 @@
 package ru.pentragon.java2.networkclient;
 
 import javafx.application.Application;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,18 +11,15 @@ import javafx.stage.Window;
 import ru.pentragon.java2.networkclient.controllers.AuthDialogControlleer;
 import ru.pentragon.java2.networkclient.controllers.MainViewController;
 import ru.pentragon.java2.networkclient.models.ClientNetwork;
-import ru.pentragon.java2.networkclient.user_repo.User;
-import ru.pentragon.java2.networkclient.user_repo.Users;
 
 import java.io.IOException;
-import java.util.ArrayList;
+
 
 public class ClientApp extends Application {
     private Stage primaryStage;
     private Stage authDialogStage;
     private ClientNetwork network;
     private MainViewController viewController;
-    private Users users;
 
 //    public void setPrimaryStage(Stage primaryStage) {
 //        this.primaryStage = primaryStage;
@@ -37,10 +33,11 @@ public class ClientApp extends Application {
         mainLoader.setLocation(ClientApp.class.getResource("views/MainView.fxml"));
         Parent root = mainLoader.load();
 
-        MainViewController controller = mainLoader.getController();
-        controller.setMainApp(this);
+        //MainViewController controller = mainLoader.getController();
+        viewController = mainLoader.getController();
+        viewController.setMainApp(this);
         this.primaryStage = primaryStage;
-        //this.primaryStage.setTitle("");
+
         primaryStage.setScene(new Scene(root));//, 300, 275
         primaryStage.setResizable(false);
 
@@ -105,13 +102,9 @@ public class ClientApp extends Application {
     public void openChat() {
         authDialogStage.close();
         primaryStage.show();
-        primaryStage.setTitle(network.getUsername());
+        primaryStage.setTitle(network.getUser().getUsername());
         network.waitMessages(viewController);
 
     }
 
-
-    public ArrayList<User> getPersonData() {
-        return Users.getUSERS();
-    }
 }
