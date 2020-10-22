@@ -141,6 +141,7 @@ public class ClientNetwork {
                         default: {
                             System.err.println("Unknown type command from server " + command.getType());
                         }
+                        
                     }
                 }
             } catch (IOException e) {
