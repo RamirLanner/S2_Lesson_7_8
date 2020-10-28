@@ -3,7 +3,7 @@ package ru.pentragon.java2.networkserver.auth;
 import ru.pentragon.java2.clientserver.user.User;
 import ru.pentragon.java2.networkserver.stmc.MyServer;
 
-public class DefaultAuthService implements AuthService{
+public class DefaultAuthService implements AuthService {
 
 
     @Override
@@ -14,11 +14,11 @@ public class DefaultAuthService implements AuthService{
 
     @Override
     public synchronized User getUserByLoginAndPassword(String login, String password) {
-        for (User user : MyServer.getUsers().getUserList()) {
-            if (user.getLogin().equals(login) && user.getPassword().equals(password)) {
-                return user;
-            }
-        }
+//        for (User user : MyServer.getUsers().getUserList()) {
+//            if (user.getLogin().equals(login) && user.getPassword().equals(password)) {
+//                return user;
+//            }
+//        }
         return null;
     }
 

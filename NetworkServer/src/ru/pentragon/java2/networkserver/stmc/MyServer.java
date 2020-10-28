@@ -5,6 +5,7 @@ import ru.pentragon.java2.clientserver.user.User;
 import ru.pentragon.java2.clientserver.user.Users;
 import ru.pentragon.java2.networkserver.auth.AuthService;
 import ru.pentragon.java2.networkserver.auth.DefaultAuthService;
+import ru.pentragon.java2.networkserver.auth.MSSqlAuthService;
 import ru.pentragon.java2.networkserver.handler.ClientHandler;
 import ru.pentragon.java2.networkserver.repo.MyRepo;
 
@@ -21,16 +22,17 @@ public class MyServer {
     private final AuthService authService;
     private final List<ClientHandler> clients = new ArrayList<>();
     private boolean serverOff;
-    private static Users users;
+    private Users users;
 
-    public static Users getUsers() {
-        return users;
+    public synchronized Users getUsers() {
+        return this.users;
     }
 
     public MyServer(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
-        this.authService = new DefaultAuthService();
-        users = MyRepo.createDataBase();
+        //this.authService = new DefaultAuthService();
+        //users = MyRepo.createDataBase();
+        this.authService = new MSSqlAuthService();
     }
 
     public void start() throws IOException{
@@ -70,12 +72,14 @@ public class MyServer {
         clients.add(handler);
         Map<String, String> mapU= listConnectedUsers();
         broadcastMessage(null, Command.updateUserListCommand(mapU));
+        //users.addUser(handler.getUser());
     }
 
     public synchronized void unsubscribe(ClientHandler handler) throws IOException {
         clients.remove(handler);
         Map<String, String> mapU= listConnectedUsers();
         broadcastMessage(null, Command.updateUserListCommand(mapU));
+        //users.removeUser(handler.getUser());
     }
 
     private Map<String, String> listConnectedUsers() {
@@ -110,8 +114,8 @@ public class MyServer {
                 client.sendMessage(Command.messageCommand(receiver,message,sender));
 
                 //сохраняем личную переписку
-                client.getUser().saveMsgToDialog(users.getUserByLogin(sender).getLogin(), message);//записали сообщение получателю
-                users.getUserByLogin(sender).saveMsgToDialog(client.getUser().getLogin(),message);//записали сообщение отправителю
+                //client.getUser().saveMsgToDialog(users.getUserByLogin(sender).getLogin(), message);//записали сообщение получателю
+                //users.getUserByLogin(sender).saveMsgToDialog(client.getUser().getLogin(),message);//записали сообщение отправителю
             }
         }
     }

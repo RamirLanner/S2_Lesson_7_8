@@ -109,7 +109,6 @@ public class ClientHandler {
                     } else {
                         this.username = user.getUsername();
                         sendMessage(Command.authOkCommand(this.user));
-
                         //myServer.broadcastMessage(username + " joined to chat!", this);
                         myServer.subscribe(this);
                         break;
