@@ -86,7 +86,7 @@ public class ClientNetwork {
         try {
             return (Command) getInputStream().readObject();
         } catch (ClassNotFoundException e) {
-            String errorMessage = "Unknown type of object from client";
+            String errorMessage = "Unknown type of object from server";
             System.err.println(errorMessage);
             e.printStackTrace();
             return null;

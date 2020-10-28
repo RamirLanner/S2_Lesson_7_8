@@ -3,6 +3,7 @@ package ru.pentragon.java2.networkserver.handler;
 import ru.pentragon.java2.clientserver.Command;
 import ru.pentragon.java2.clientserver.CommandType;
 import ru.pentragon.java2.clientserver.commands.AuthCommandData;
+import ru.pentragon.java2.clientserver.commands.ChangeUsernameData;
 import ru.pentragon.java2.clientserver.commands.MessageCommandData;
 import ru.pentragon.java2.clientserver.user.User;
 import ru.pentragon.java2.networkserver.stmc.MyServer;
@@ -75,6 +76,11 @@ public class ClientHandler {
             case PUBLIC_MESSAGE: {
                 System.out.println("Public message, not ready");
                 //если успею до сдачи то реализую, хочу что то свое сделать а не копипастом
+                break;
+            }
+            case CHANGE_USERNAME:{
+                ChangeUsernameData data = (ChangeUsernameData) command.getData();
+                myServer.changeUsername(user, data.getNewUsername());
                 break;
             }
             default: {

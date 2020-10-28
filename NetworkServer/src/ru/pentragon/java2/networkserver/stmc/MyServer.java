@@ -6,6 +6,7 @@ import ru.pentragon.java2.clientserver.user.Users;
 import ru.pentragon.java2.networkserver.auth.AuthService;
 import ru.pentragon.java2.networkserver.auth.DefaultAuthService;
 import ru.pentragon.java2.networkserver.auth.MSSqlAuthService;
+import ru.pentragon.java2.networkserver.auth.SqlLiteAuthService;
 import ru.pentragon.java2.networkserver.handler.ClientHandler;
 import ru.pentragon.java2.networkserver.repo.MyRepo;
 
@@ -33,6 +34,7 @@ public class MyServer {
         //this.authService = new DefaultAuthService();
         //users = MyRepo.createDataBase();
         this.authService = new MSSqlAuthService();
+        //this.authService = new SqlLiteAuthService();
     }
 
     public void start() throws IOException{
@@ -118,5 +120,11 @@ public class MyServer {
                 //users.getUserByLogin(sender).saveMsgToDialog(client.getUser().getLogin(),message);//записали сообщение отправителю
             }
         }
+    }
+
+    public synchronized void changeUsername(User user, String newUsername) throws IOException {
+        authService.updateUsername(user, newUsername);
+        Map<String, String> mapU= listConnectedUsers();
+        broadcastMessage(null, Command.updateUserListCommand(mapU));
     }
 }

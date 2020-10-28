@@ -23,6 +23,11 @@ public class DefaultAuthService implements AuthService {
     }
 
     @Override
+    public void updateUsername(User user, String newUsername) {
+
+    }
+
+    @Override
     public void stop() {
         //здесь логика закрытия подключения к бд
         System.out.println("Auth service has been finished");

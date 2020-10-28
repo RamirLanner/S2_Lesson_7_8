@@ -3,28 +3,21 @@ package ru.pentragon.java2.networkserver.auth;
 import ru.pentragon.java2.clientserver.user.User;
 
 import java.sql.*;
-
-
-public class MSSqlAuthService implements AuthService {
+//этот класс не рабочий
+//все работает в MS SQL
+public class SqlLiteAuthService implements AuthService{
 
     Connection connection;
     Statement statement;
 
     @Override
-    public void start() {
-        String connectionUrl =
-                "jdbc:sqlserver://localhost:1433;"
-                        + "database=JavaChat;"
-                        + "user=javalogin;"
-                        + "password=javapassword;"
-//                        + "encrypt=true;"
-//                        + "trustServerCertificate=false;"
-                        + "loginTimeout=30;";
+    public void start()  {
+
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            connection = DriverManager.getConnection(connectionUrl);
+            Class.forName("org.sqlite.jdbc");
+            connection = DriverManager.getConnection("jdbc:sqlite:mydatabase.db");
             statement = connection.createStatement();
-            System.out.println("Hello, MS SQL connect success");
+            System.out.println("Hello, SQL Lite connect success");
             createNewUsersTable(statement);
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -35,12 +28,11 @@ public class MSSqlAuthService implements AuthService {
 
     private void createNewUsersTable(Statement statement) throws SQLException {
         int createTableRes = 0;
-        createTableRes = statement.executeUpdate("IF NOT EXISTS(SELECT * FROM sys.tables WHERE [name] LIKE 'Users')" +
-                " CREATE TABLE Users (" +
-                "UserId int IDENTITY(1,1) PRIMARY KEY," +
-                " Login varchar(255) NOT NULL," +
-                " Password varchar(255) NOT NULL," +
-                " Username varchar(255) NOT NULL);");
+        createTableRes = statement.executeUpdate("CREATE TABLE IF NOT EXISTS 'Users'" +
+                " UserId INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " Login text NOT NULL," +
+                " Password text NOT NULL," +
+                " Username text NOT NULL);");
         if (createTableRes == 0) {
             String sqlRequestPartOne = "INSERT INTO Users (Login, Password, Username)";
             statement.addBatch(sqlRequestPartOne + " VALUES('login1', 'pass1', 'User1')");
@@ -79,23 +71,15 @@ public class MSSqlAuthService implements AuthService {
     }
 
     @Override
+    public void updateUsername(User user, String newUsername) {
+
+    }
+
+    @Override
     public void stop() {
         try {
             statement.close();
             connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public synchronized void updateUsername(User user, String newUsername) {
-        try {
-            String sqlRequest = "UPDATE Users SET Username ='" + newUsername +"' WHERE Login='" + user.getLogin() + "'";
-            if (!statement.isClosed() && !connection.isClosed() && !newUsername.equals("")) {
-                //ResultSet sqlResult = statement.executeQuery(sqlRequest);
-                int ResultSet = statement.executeUpdate(sqlRequest);
-                System.out.println("Result SQL Request change Username = "+ResultSet);
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

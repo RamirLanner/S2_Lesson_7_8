@@ -38,6 +38,10 @@ public class MainViewController {
     public TextArea msgTextArea;
     @FXML
     public Button sendButton;
+    @FXML
+    public Button changeUsername;
+    @FXML
+    public TextField newUsernameTextField;
 
     private List<String> clientsList;
 
@@ -93,6 +97,23 @@ public class MainViewController {
         } else {
             showNoSelectionAlert();
         }
+
+    }
+    @FXML
+    public void handleChangeUsername(ActionEvent actionEvent) {
+        String insertData = newUsernameTextField.getText();
+            try {
+                if(!insertData.equals("")){
+                    System.out.println(insertData);
+                    network.getOutputStream().writeObject(Command.changeUsernameCommand(insertData));
+                    network.getUser().setUsername(insertData);
+                    newUsernameTextField.clear();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                String errorMessage = "Failed to send message";
+                ClientApp.showErrorWindow(e.getMessage(), errorMessage);
+            }
 
     }
 

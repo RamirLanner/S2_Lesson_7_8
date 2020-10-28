@@ -107,4 +107,8 @@ public class ClientApp extends Application {
 
     }
 
+    public void openChangeNameDialog(){
+
+    }
+
 }
