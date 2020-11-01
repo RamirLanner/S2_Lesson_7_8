@@ -6,10 +6,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import javafx.scene.control.cell.PropertyValueFactory;
 import ru.pentragon.java2.clientserver.Command;
 import ru.pentragon.java2.clientserver.user.Message;
-import ru.pentragon.java2.clientserver.user.User;
 import ru.pentragon.java2.networkclient.ClientApp;
 import ru.pentragon.java2.networkclient.models.ClientNetwork;
 
@@ -86,6 +84,7 @@ public class MainViewController {
             try {
                 network.getOutputStream().writeObject(Command.messageCommand(selectedUser, (network.getUser().getUsername() + ": " + msgTextArea.getText()), network.getUser().getLogin()));
                 network.getUser().saveMsgToDialog(selectedUser, msgTextArea.getText());
+                network.getMyMessagesLogger().writeToLogFile(selectedUser,msgTextArea.getText());
                 msgTextArea.clear();
                 showMessages();
             } catch (IOException e) {
@@ -148,6 +147,16 @@ public class MainViewController {
         this.clientsList = new ArrayList<>();
         this.clientsList.addAll(users.keySet());
         System.out.println(clientsList.toString());
+        LinkedList<String> myList;
+        for (String s : clientsList) {
+            if(!network.getUser().getMessages().getMessageData().containsKey(s)){
+                myList = network.getMyMessagesLogger().readFromLogFile(s);
+                if(myList!=null){
+                    network.getUser().getMessages().getMessageData().put(s,  myList);
+                    System.out.println(myList.toString());
+                }
+            }
+        }
         contactTable.setItems(FXCollections.observableArrayList(clientsList));
         contactColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()));
     }
