@@ -17,13 +17,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MyServer {
     private final ServerSocket serverSocket;
     private final AuthService authService;
     private final List<ClientHandler> clients = new ArrayList<>();
+    private final int maxClientConnection = 5;
     private boolean serverOff;
     private Users users;
+    private static ExecutorService executorService;
 
     public synchronized Users getUsers() {
         return this.users;
@@ -35,6 +39,7 @@ public class MyServer {
         //users = MyRepo.createDataBase();
         this.authService = new MSSqlAuthService();
         //this.authService = new SqlLiteAuthService();
+        executorService =  Executors.newFixedThreadPool(maxClientConnection);
     }
 
     public void start() throws IOException{
@@ -50,6 +55,7 @@ public class MyServer {
             e.printStackTrace();
         } finally {
             authService.stop();
+            executorService.shutdown();
             serverSocket.close();
         }
     }
@@ -62,7 +68,7 @@ public class MyServer {
     }
 
     private void processClientConnection(Socket clientSocket) throws IOException {
-        ClientHandler clientHandler = new ClientHandler(this, clientSocket);
+        ClientHandler clientHandler = new ClientHandler(this, clientSocket, executorService);
         clientHandler.handle();
     }
 
