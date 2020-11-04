@@ -14,11 +14,11 @@ public class Users implements Serializable {//хранилище данных
         users = new ArrayList<>();
     }
 
-    public void addUsers(User... args){
+    public synchronized void addUsers(User... args){
         Collections.addAll(users, args);
     }
 
-    public void addUser(User user){
+    public synchronized void addUser(User user){
         users.add(user);
     }
 
@@ -35,5 +35,10 @@ public class Users implements Serializable {//хранилище данных
         }
         return null;
     }
+    public synchronized void removeUser(User user){
+        users.remove(user);
+    }
+
+
 
 }

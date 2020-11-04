@@ -3,6 +3,7 @@ package ru.pentragon.java2.networkserver.handler;
 import ru.pentragon.java2.clientserver.Command;
 import ru.pentragon.java2.clientserver.CommandType;
 import ru.pentragon.java2.clientserver.commands.AuthCommandData;
+import ru.pentragon.java2.clientserver.commands.ChangeUsernameData;
 import ru.pentragon.java2.clientserver.commands.MessageCommandData;
 import ru.pentragon.java2.clientserver.user.User;
 import ru.pentragon.java2.networkserver.stmc.MyServer;
@@ -77,6 +78,11 @@ public class ClientHandler {
                 //если успею до сдачи то реализую, хочу что то свое сделать а не копипастом
                 break;
             }
+            case CHANGE_USERNAME:{
+                ChangeUsernameData data = (ChangeUsernameData) command.getData();
+                myServer.changeUsername(user, data.getNewUsername());
+                break;
+            }
             default: {
                 System.err.println("Unknown type command from user " + command.getType());
             }
@@ -109,7 +115,6 @@ public class ClientHandler {
                     } else {
                         this.username = user.getUsername();
                         sendMessage(Command.authOkCommand(this.user));
-
                         //myServer.broadcastMessage(username + " joined to chat!", this);
                         myServer.subscribe(this);
                         break;

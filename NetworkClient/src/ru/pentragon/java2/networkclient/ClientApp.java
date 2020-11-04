@@ -8,6 +8,8 @@ import javafx.scene.control.Alert;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import ru.pentragon.java2.logger.ClientMessageContainer;
+import ru.pentragon.java2.logger.Logger;
 import ru.pentragon.java2.networkclient.controllers.AuthDialogControlleer;
 import ru.pentragon.java2.networkclient.controllers.MainViewController;
 import ru.pentragon.java2.networkclient.models.ClientNetwork;
@@ -104,6 +106,10 @@ public class ClientApp extends Application {
         primaryStage.show();
         primaryStage.setTitle(network.getUser().getUsername());
         network.waitMessages(viewController);
+
+    }
+
+    public void openChangeNameDialog(){
 
     }
 

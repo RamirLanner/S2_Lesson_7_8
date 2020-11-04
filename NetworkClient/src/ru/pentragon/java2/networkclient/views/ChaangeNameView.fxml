@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+<AnchorPane maxHeight="150.0" maxWidth="250.0" minHeight="150.0" minWidth="250.0" prefHeight="150.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.pentragon.java2.networkclient.controllers.ChangeNameController">
+   <children>
+      <Label layoutX="81.0" layoutY="14.0" text="Change Name">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <TextField layoutX="36.0" layoutY="50.0" prefHeight="25.0" prefWidth="179.0" />
+      <Button layoutX="110.0" layoutY="95.0" mnemonicParsing="false" text="Ok" />
+   </children>
+</AnchorPane>

@@ -4,6 +4,8 @@ import javafx.application.Platform;
 import ru.pentragon.java2.clientserver.Command;
 import ru.pentragon.java2.clientserver.commands.*;
 import ru.pentragon.java2.clientserver.user.User;
+import ru.pentragon.java2.logger.ClientMessageContainer;
+import ru.pentragon.java2.logger.Logger;
 import ru.pentragon.java2.networkclient.ClientApp;
 import ru.pentragon.java2.networkclient.controllers.MainViewController;
 
@@ -22,6 +24,12 @@ public class ClientNetwork {
     private ObjectOutputStream outputStream;
     private Socket socket;
     private User user;
+
+    public Logger getMyMessagesLogger() {
+        return myMessages;
+    }
+
+    private Logger myMessages;
 
     public User getUser() {
         return user;
@@ -62,6 +70,8 @@ public class ClientNetwork {
                 case AUTH_OK: {
                     AuthOkCommandData data = (AuthOkCommandData) command.getData();
                     this.user = data.getUser();
+                    myMessages = new ClientMessageContainer();
+                    myMessages.createLogFileDir(user);
                     return true;
                 }
                 case AUTH_ERROR: {
@@ -77,7 +87,7 @@ public class ClientNetwork {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Send/recieve logpass pronlem!");
+            System.err.println("Send/recieve logpass problem!");
             return false;
         }
     }
@@ -86,7 +96,7 @@ public class ClientNetwork {
         try {
             return (Command) getInputStream().readObject();
         } catch (ClassNotFoundException e) {
-            String errorMessage = "Unknown type of object from client";
+            String errorMessage = "Unknown type of object from server";
             System.err.println(errorMessage);
             e.printStackTrace();
             return null;
@@ -130,6 +140,7 @@ public class ClientNetwork {
                             System.out.println(sender+" to "+ receiver+": message="+message);
                             Platform.runLater(() -> viewController.showMessages());
                             user.saveMsgToDialog(sender, message);
+                            myMessages.writeToLogFile(sender, message);
                             break;
                         }
                         case UPDATE_USERS_LIST: {

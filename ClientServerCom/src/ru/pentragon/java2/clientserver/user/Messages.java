@@ -25,6 +25,9 @@ public class Messages implements Serializable {
         }
     }
 
+    public Map<String, LinkedList<String>> getMessageData() {
+        return messageData;
+    }
 //    public LinkedList<String> getMSGs(User user){
 //        return messageData.getOrDefault(user, null);
 //    }

@@ -8,5 +8,6 @@ public enum CommandType {
     PUBLIC_MESSAGE,
     SERVER_INFO,
     UPDATE_USERS_LIST,
-    END
+    END,
+    CHANGE_USERNAME
 }
