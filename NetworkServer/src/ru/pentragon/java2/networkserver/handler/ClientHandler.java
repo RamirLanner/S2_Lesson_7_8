@@ -13,8 +13,12 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
+    private ExecutorService executorService;
 
     private final MyServer myServer;
     private final Socket clientSocket;
@@ -29,16 +33,17 @@ public class ClientHandler {
         return user;
     }
 
-    public ClientHandler(MyServer myServer, Socket clientSocket) {
+    public ClientHandler(MyServer myServer, Socket clientSocket,ExecutorService executorService) {
         this.myServer = myServer;
         this.clientSocket = clientSocket;
+        this.executorService = executorService;
     }
 
     public void handle() throws IOException {
         in = new ObjectInputStream(clientSocket.getInputStream());
         out = new ObjectOutputStream(clientSocket.getOutputStream());
 
-        new Thread(() -> {
+        executorService.execute(() -> {
             try {
                 authentication();
                 readMessages();
@@ -51,7 +56,24 @@ public class ClientHandler {
                     System.err.println("Failed to close connection!");
                 }
             }
-        }).start();
+        });
+
+        //executorService.shutdown();
+
+//        new Thread(() -> {
+//            try {
+//                authentication();
+//                readMessages();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } finally {
+//                try {
+//                    closeConnection();
+//                } catch (IOException e) {
+//                    System.err.println("Failed to close connection!");
+//                }
+//            }
+//        }).start();
     }
 
     private void readMessages() throws IOException {
